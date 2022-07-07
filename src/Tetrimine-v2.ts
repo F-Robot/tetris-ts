@@ -63,12 +63,9 @@ export default class Tetrimine implements ITetrimine {
     })
   }
   rotate() {
-    this.COORDS.map((coords) => {
-      this.redraw(() => {
-        coords.x = xPivot(coords)
-        coords.y = yPivot(coords)
-      })
-    })
+    // this.COORDS.map((coords) => {
+    //   this.redraw(() => {})
+    // })
   }
   canMove(direction: Direction): boolean {
     return this.COORDS.every(({ x, y }) => {
