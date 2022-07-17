@@ -1,3 +1,5 @@
+export type Memorie = Array<Array<TetrimineName | ''>>
+
 export interface Position {
   x: number
   y: number
@@ -21,11 +23,17 @@ export interface IBoard {
   readonly SIZE: Size
   readonly POSITION: Position
   readonly CELL_SIDE_SIZE: number
+  MEMORIE: Memorie
 
   context: CanvasRenderingContext2D
   options?: BoardOptions
 
   draw(): void
+  isGameEnd(): boolean
+  clearBoard(): void
+  clear(): void
+  isInMemory(coords: Coords[]): boolean
+  saveTetrimine(tetrimine: ITetrimine): void
   getCanvasPosition(coords: Coords): Position
 }
 export enum Direction {
@@ -64,4 +72,11 @@ export interface ITetrimine {
   move(direction: Direction): void
   redraw(callback: () => void): void
   canMove(direction: Direction, coords: Coords): void
+}
+export interface IGame {
+  BOARD: IBoard
+  TETRIMINE: ITetrimine
+  context: CanvasRenderingContext2D
+  createNewTetrimine(): void
+  endGame(): void
 }
