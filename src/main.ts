@@ -1,15 +1,18 @@
 import Utils from './Utils'
-import Game from './Game'
 import { MARGIN } from './constants'
+import Board from './Board'
+import Tetrimine from './Tetrimine'
 
 const canvas = Utils.createCanvas('#app', { background: '#f4f4f4' })
 const context = Utils.getCanvasContext(canvas)
 
-const game = new Game(context, { margin: { x: MARGIN, y: MARGIN } })
+const board = new Board(context, { margin: { x: MARGIN, y: MARGIN } })
+const tetrimine = new Tetrimine(board)
 
-const { width, height } = game.SIZE
+const { width, height } = board.size
 const canvasWidth = width + MARGIN * 2
 const canvasHeight = height + MARGIN * 2
 Utils.resizeCanvas(canvas, canvasWidth, canvasHeight)
 
-game.start()
+board.draw()
+tetrimine.draw()
