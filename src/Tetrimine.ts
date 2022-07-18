@@ -20,6 +20,7 @@ export default class Tetrimine implements ITetrimine {
   readonly context: CanvasRenderingContext2D
 
   public name: TetrimineName
+  public intervalId: number
   public coords: Coords[]
   public rotedCoords: Coords[]
 
@@ -32,16 +33,18 @@ export default class Tetrimine implements ITetrimine {
     this.coords = TETRIMINES[this.name].coords.map((coords) => ({ ...coords }))
     this.rotedCoords = this.coords.map((coords) => ({ ...coords }))
     this.alignTetrimine()
+    this.intervalId = this.setDownInterval(1000)
 
     this.listenKeyEvents()
-    // this.INTERVAL_ID = this.setDownInterval(this.INTERVAL)
-    // this.GAME_END = false
   }
   newTetrmine() {
+    clearInterval(this.intervalId)
+    this.board.saveTetrimine(this)
     this.name = this.getRandomTetrimine()
     this.coords = TETRIMINES[this.name].coords.map((coords) => ({ ...coords }))
     this.rotedCoords = this.coords.map((coords) => ({ ...coords }))
     this.alignTetrimine()
+    this.intervalId = this.setDownInterval(1000)
     this.draw()
   }
   getPosition(): Position[] {
@@ -59,6 +62,7 @@ export default class Tetrimine implements ITetrimine {
   }
   draw(): void {
     this.getPosition().map(({ x, y }) => {
+      this.context.fillStyle = '#000000'
       this.context.fillRect(x, y, this.cellSize, this.cellSize)
     })
   }
@@ -74,7 +78,7 @@ export default class Tetrimine implements ITetrimine {
     this.draw()
   }
   move(direction: Direction) {
-    if (!this.canMoveInsideBoard(direction)) {
+    if (!this.canMoveInBoard(direction) || !this.canMoveInMemory(direction)) {
       if (direction === Direction.down) return this.newTetrmine()
       return
     }
@@ -87,7 +91,8 @@ export default class Tetrimine implements ITetrimine {
     })
   }
   rotate() {
-    if (!this.canRotateInsideBoard()) return
+    if (this.name === TetrimineName.o) return
+    if (!this.canRotateInMemory() || !this.canRotateInsideBoard()) return
     this.redraw((coords, index) => {
       const { x, y } = this.rotedCoords[index]
       this.rotedCoords[index].x = y
@@ -96,7 +101,27 @@ export default class Tetrimine implements ITetrimine {
       coords.y = this.rotedCoords[index].y - this.getTranslatedCoords().y
     })
   }
-  canMoveInsideBoard(direction: Direction): boolean {
+  canRotateInMemory() {
+    const newCoords = this.coords.map((_coords, index) => {
+      const { x, y } = this.rotedCoords[index]
+      return {
+        x: y - this.getTranslatedCoords().x,
+        y: -x - this.getTranslatedCoords().y,
+      }
+    })
+    return !newCoords.some((coords) => !!this.memory[coords.y][coords.x])
+  }
+  canMoveInMemory(direction: Direction) {
+    const newCoords = this.coords.map(({ x, y }) => {
+      if (direction === Direction.up) --y
+      if (direction === Direction.left) --x
+      if (direction === Direction.down) ++y
+      if (direction === Direction.right) ++x
+      return { x: x, y: y }
+    })
+    return !newCoords.some((coords) => !!this.memory[coords.y][coords.x])
+  }
+  canMoveInBoard(direction: Direction): boolean {
     return this.coords.every(({ x, y }) => {
       if (direction === Direction.up) return --y >= 0
       if (direction === Direction.left) return --x >= 0
@@ -132,18 +157,11 @@ export default class Tetrimine implements ITetrimine {
       if (RIGHT_KEYS.includes(event.key)) this.move(Direction.right)
     })
   }
-  // // setDownInterval(timeout: number) {
-  // //   return setInterval(() => {
-  // //     this.canMoveInsideBoard(Direction.down)
-  // //       ? this.move(Direction.down)
-  // //       : this.saveAndCreateNewTetrimine()
-  // //   }, timeout)
-  // // }
-  // // saveAndCreateNewTetrimine() {
-  // //   clearInterval(this.INTERVAL_ID)
-  // //   this.board.saveTetrimine(this)
-  // //   this.game.createNewTetrimine()
-  // // }
-  // // clearInterval() {
-  // //   clearInterval(this.INTERVAL_ID)
+  setDownInterval(timeout: number) {
+    return setInterval(() => {
+      this.canMoveInBoard(Direction.down)
+        ? this.move(Direction.down)
+        : this.newTetrmine()
+    }, timeout)
+  }
 }

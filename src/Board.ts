@@ -1,4 +1,4 @@
-import type {
+import {
   IBoard,
   BoardOptions,
   Position,
@@ -39,9 +39,12 @@ export default class Board implements IBoard {
   }
   drawCell(coords: Coords): void {
     const { x, y } = this.getPosition(coords)
+    this.context.fillStyle = '#f4f4f4'
+    this.context.fillRect(x, y, this.cellSize, this.cellSize)
     this.context.strokeRect(x, y, this.cellSize, this.cellSize)
   }
   drawMino(coords: Coords): void {
+    this.context.fillStyle = '#000000'
     const { x, y } = this.getPosition(coords)
     this.context.fillRect(x, y, this.cellSize, this.cellSize)
   }
@@ -49,6 +52,7 @@ export default class Board implements IBoard {
     tetrimine.coords.map((coords) => {
       this.memory[coords.y][coords.x] = tetrimine.name
     })
+    this.getFullRows().length !== 0 ? this.clearFullRows() : this.draw()
   }
   getPosition(coords: Coords): Position {
     return {
