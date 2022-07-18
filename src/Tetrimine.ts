@@ -18,11 +18,14 @@ export default class Tetrimine implements ITetrimine {
   readonly cellSize: number
   readonly memory: Memory
   readonly context: CanvasRenderingContext2D
+  readonly timeout = 1000
+  readonly keyPressTimeout = 1000
 
   public name: TetrimineName
   public intervalId: number
   public coords: Coords[]
   public rotedCoords: Coords[]
+  public keyPressTime = Date.now()
 
   constructor(public board: IBoard) {
     this.context = this.board.context
@@ -33,7 +36,7 @@ export default class Tetrimine implements ITetrimine {
     this.coords = TETRIMINES[this.name].coords.map((coords) => ({ ...coords }))
     this.rotedCoords = this.coords.map((coords) => ({ ...coords }))
     this.alignTetrimine()
-    this.intervalId = this.setDownInterval(1000)
+    this.intervalId = this.setDownInterval(this.timeout)
 
     this.listenKeyEvents()
   }
@@ -89,6 +92,9 @@ export default class Tetrimine implements ITetrimine {
       if (direction === Direction.right) return coords.x++
       throw new Error('Invalid Key')
     })
+    this.keyPressTime = Date.now()
+    clearInterval(this.intervalId)
+    this.intervalId = this.setDownInterval(this.timeout)
   }
   rotate() {
     if (this.name === TetrimineName.o) return
@@ -100,6 +106,7 @@ export default class Tetrimine implements ITetrimine {
       coords.x = this.rotedCoords[index].x - this.getTranslatedCoords().x
       coords.y = this.rotedCoords[index].y - this.getTranslatedCoords().y
     })
+    this.keyPressTime = Date.now()
   }
   canRotateInMemory() {
     const newCoords = this.coords.map((_coords, index) => {
@@ -142,6 +149,9 @@ export default class Tetrimine implements ITetrimine {
       )
     })
   }
+  canPressKey() {
+    return Date.now() - this.keyPressTime < this.keyPressTimeout
+  }
   alignTetrimine() {
     this.coords.map((coords) => {
       coords.x += this.board.columns / 2 - 1
@@ -151,10 +161,11 @@ export default class Tetrimine implements ITetrimine {
   }
   listenKeyEvents(): void {
     document.addEventListener('keydown', (event) => {
-      if (UP_KEYS.includes(event.key)) this.rotate()
-      if (LEFT_KEYS.includes(event.key)) this.move(Direction.left)
-      if (DOWN_KEYS.includes(event.key)) this.move(Direction.down)
-      if (RIGHT_KEYS.includes(event.key)) this.move(Direction.right)
+      if (!this.canPressKey()) return
+      if (UP_KEYS.includes(event.key)) return this.rotate()
+      if (LEFT_KEYS.includes(event.key)) return this.move(Direction.left)
+      if (DOWN_KEYS.includes(event.key)) return this.move(Direction.down)
+      if (RIGHT_KEYS.includes(event.key)) return this.move(Direction.right)
     })
   }
   setDownInterval(timeout: number) {
