@@ -1,45 +1,35 @@
+import Utils from './Utils'
 import Board from './Board'
 import Tetrimine from './Tetrimine'
-import { BoardOptions, IBoard, IGame, ITetrimine, Size } from './types'
+
+import type { GameOptions, IBoard, IGame, ITetrimine } from './types'
 
 export default class Game implements IGame {
-  public BOARD: IBoard
-  public TETRIMINE: ITetrimine
-  public SIZE: Size
+  readonly board: IBoard
+  readonly tetrimine: ITetrimine
+  readonly canvas: HTMLCanvasElement
+  readonly context: CanvasRenderingContext2D
 
-  constructor(
-    public context: CanvasRenderingContext2D,
-    public options?: BoardOptions
-  ) {
-    this.BOARD = new Board(this.context, this, this.options)
-    this.TETRIMINE = new Tetrimine(this.BOARD, this)
-    this.SIZE = this.BOARD.SIZE
-    this.TETRIMINE.listenKeyEvents()
+  constructor(public selector: string, public options?: GameOptions) {
+    this.canvas = Utils.createCanvas(selector, this.options?.canvasOptions)
+    this.context = Utils.getCanvasContext(this.canvas)
+    this.board = new Board(this.context, this.options?.boardOptions)
+    this.tetrimine = new Tetrimine(this.board)
+    this.resizeCanvas()
   }
-  start() {
-    this.BOARD.draw()
-    this.TETRIMINE.draw()
+  get score(): number {
+    return this.board.score
   }
-  createNewTetrimine() {
-    for (const key in this.TETRIMINE) {
-      // @ts-ignore
-      delete this.TETRIMINE[key]
-    }
-    Object.assign(this.TETRIMINE, new Tetrimine(this.BOARD, this))
-    this.TETRIMINE.draw()
+  start(): void {
+    this.board.draw()
+    this.tetrimine.draw()
   }
-  endGame() {
-    this.BOARD.clear()
-    for (const key in this.TETRIMINE) {
-      // @ts-ignore
-      delete this.TETRIMINE[key]
-    }
-    for (const key in this.BOARD) {
-      // @ts-ignore
-      delete this.BOARD[key]
-    }
-    Object.assign(this.BOARD, new Board(this.context, this, this.options))
-    Object.assign(this.TETRIMINE, new Tetrimine(this.BOARD, this))
-    this.TETRIMINE.draw()
+  newGame(): void {
+    this.tetrimine.newTetrimine()
+  }
+  resizeCanvas(): void {
+    const margin = this.options?.boardOptions.margin ?? 0
+    const { width, height } = this.board.size
+    Utils.resizeCanvas(this.canvas, width + margin * 2, height + margin * 2)
   }
 }

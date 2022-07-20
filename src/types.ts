@@ -28,8 +28,15 @@ export interface Size {
   width: number
   height: number
 }
+export interface CanvasOptions {
+  backgroundColor?: string
+}
 export interface BoardOptions {
-  margin?: Position
+  margin?: number
+}
+export interface GameOptions {
+  canvasOptions: CanvasOptions
+  boardOptions: BoardOptions
 }
 export interface TetrimineCoords {
   coords: Coords[]
@@ -37,12 +44,25 @@ export interface TetrimineCoords {
 export type Tetrimines = {
   [key in TetrimineName]: TetrimineCoords
 }
+export interface IUtils {
+  createCanvas(selector: string, options?: CanvasOptions): void
+  getCanvasContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D
+  resizeCanvas(canvas: HTMLCanvasElement, width: number, height: number): void
+}
 export interface IGame {
-  BOARD: IBoard
-  TETRIMINE: ITetrimine
-  context: CanvasRenderingContext2D
-  createNewTetrimine(): void
-  endGame(): void
+  readonly canvas: HTMLCanvasElement
+  readonly context: CanvasRenderingContext2D
+  readonly board: IBoard
+  readonly tetrimine: ITetrimine
+
+  selector: string
+  options?: GameOptions
+
+  get score(): number
+
+  start(): void
+  newGame(): void
+  resizeCanvas(): void
 }
 export interface IBoard {
   readonly columns: number
@@ -52,35 +72,56 @@ export interface IBoard {
   readonly size: Size
   readonly position: Position
   readonly cellSize: number
-  context: CanvasRenderingContext2D
-  options?: BoardOptions
+
+  score: number
   memory: Memory
+  options?: BoardOptions
+  context: CanvasRenderingContext2D
+
   draw(): void
+  endGame(): void
   initMemory(): void
+  isGameOver(): boolean
+  clearFullRows(): void
+  getFullRows(): Array<number>
   drawCell(coords: Coords): void
   drawMino(coords: Coords): void
   getPosition(coords: Coords): Position
-  getFullRows(): Array<number>
-  clearFullRows(): void
   saveTetrimine(tetrimine: ITetrimine): void
 }
 export interface ITetrimine {
-  readonly name: TetrimineName
-  readonly cellSize: number
-  readonly coords: Coords[]
-  readonly rotedCoords: Coords[]
-  readonly board: IBoard
-  readonly context: CanvasRenderingContext2D
   readonly memory: Memory
+  readonly timeout: number
+  readonly cellSize: number
+  readonly keyPressTimeout: number
+  readonly context: CanvasRenderingContext2D
 
-  getPosition(): Position[]
-  getRandomTetrimine(): TetrimineName
-  getTranslatedCoords(): Coords
+  board: IBoard
+  coords: Coords[]
+  intervalId: number
+  name: TetrimineName
+  isGameOver: boolean
+  keyPressTime: number
+  rotedCoords: Coords[]
 
-  // draw(): void
-  // clear(): void
-  // listenKeyEvents(): void
-  // move(direction: Direction): void
-  // redraw(callback: () => void): void
-  // canMove(direction: Direction, coords: Coords): void
+  get position(): Position[]
+  get translatedCoords(): Coords
+  get randomTetrimine(): TetrimineName
+
+  draw(): void
+  clear(): void
+  rotate(): void
+  endGame(): void
+  newTetrimine(): void
+  saveTetrimine(): void
+  canPressKey(): boolean
+  alignTetrimine(): void
+  listenKeyEvents(): void
+  canRotateInBoard(): boolean
+  canRotateInMemory(): boolean
+  move(direction: Direction): void
+  setDownInterval(timeout: number): void
+  canMoveInBoard(direction: Direction): boolean
+  canMoveInMemory(direction: Direction): boolean
+  redraw(callback: (coords: Coords, index: number) => void): void
 }

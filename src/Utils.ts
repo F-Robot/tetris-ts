@@ -1,24 +1,14 @@
 import { cover } from 'intrinsic-scale'
+import type { CanvasOptions, IUtils } from './types'
 
-export interface CreateCanvasOptions {
-  background?: string
-}
-interface IUtils {
-  createCanvas(
-    selector: string,
-    options?: CreateCanvasOptions
-  ): HTMLCanvasElement
-  getCanvasContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D
-  resizeCanvas(canvas: HTMLCanvasElement, width: number, height: number): void
-}
 class Utils implements IUtils {
-  createCanvas(selector: string, options?: CreateCanvasOptions) {
+  createCanvas(selector: string, options?: CanvasOptions) {
     if (typeof selector !== 'string') throw 'Invalid selector'
     const parent = document.querySelector<HTMLElement>(selector)
-    if (!parent) throw 'Not found element'
+    if (!parent) throw 'Element not found'
     const canvas = document.createElement('canvas')
-    if (options && options.background) {
-      canvas.style.background = options.background
+    if (options && options.backgroundColor) {
+      canvas.style.background = options.backgroundColor
     }
     parent.appendChild(canvas)
     return canvas
@@ -34,5 +24,4 @@ class Utils implements IUtils {
     canvas.width = dimentions.width
   }
 }
-
 export default new Utils()

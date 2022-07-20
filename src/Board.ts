@@ -16,13 +16,17 @@ export default class Board implements IBoard {
   readonly height = this.rows * this.cellSize
   readonly width = this.columns * this.cellSize
   readonly size: Size = { width: this.width, height: this.height }
+
+  public score = 0
   public memory: Memory = [['']]
 
   constructor(
     public context: CanvasRenderingContext2D,
     public options?: BoardOptions
   ) {
-    if (options && options.margin) this.position = options.margin
+    if (options && options.margin) {
+      this.position = { x: options.margin, y: options.margin }
+    }
     this.initMemory()
   }
   initMemory(): void {
@@ -65,9 +69,20 @@ export default class Board implements IBoard {
       .map((row, y) => (row.every((cell) => cell !== '') ? y : undefined))
       .filter((row): row is number => row !== undefined)
   }
+  isGameOver(): boolean {
+    return this.memory[0].some((cell) => cell !== '')
+  }
+  endGame(): void {
+    this.score = 0
+    this.initMemory()
+    this.draw()
+  }
   clearFullRows(): void {
     const rows = this.getFullRows()
-    rows.map((row) => this.memory[row].fill(''))
+    rows.map((row) => {
+      this.memory[row].fill('')
+      this.score += 100
+    })
     for (let row = 19; row >= 0; row--) {
       if (row < Math.max(...rows)) this.memory[row + 1] = [...this.memory[row]]
     }
