@@ -1,6 +1,5 @@
 {
-  "name": "tetris-js",
-  "private": true,
+  "name": "tetris-ts-vite",
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",

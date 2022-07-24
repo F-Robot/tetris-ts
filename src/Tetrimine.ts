@@ -8,12 +8,12 @@ import {
 import { TetrimineName, Direction } from './types'
 import type { IBoard, Memory, Coords, Position, ITetrimine } from './types'
 
-export default class Tetrimine implements ITetrimine {
+export class Tetrimine implements ITetrimine {
   readonly cellSize: number
   readonly memory: Memory
   readonly context: CanvasRenderingContext2D
-  readonly timeout = 1500
-  readonly keyPressTimeout = 100
+  readonly timeout = 700
+  readonly keyPressTimeout = 50
 
   public intervalId = 0
   public isGameOver = false
@@ -21,12 +21,12 @@ export default class Tetrimine implements ITetrimine {
   public keyPressTime = Date.now()
   public rotedCoords: Coords[] = []
   public name: TetrimineName = this.randomTetrimine
+  public color = TETRIMINES[this.name].color
 
   constructor(public board: IBoard) {
     this.context = this.board.context
     this.memory = this.board.memory
     this.cellSize = this.board.cellSize
-    this.newTetrimine()
     this.listenKeyEvents()
   }
   get position(): Position[] {
@@ -44,13 +44,15 @@ export default class Tetrimine implements ITetrimine {
   }
   draw(): void {
     this.position.map(({ x, y }) => {
-      this.context.fillStyle = '#000000'
+      this.context.fillStyle = this.color
       this.context.fillRect(x, y, this.cellSize, this.cellSize)
     })
   }
   clear(): void {
     this.position.map(({ x, y }) => {
-      this.context.clearRect(x, y, this.cellSize, this.cellSize)
+      this.context.fillStyle = this.board.options?.boardColor ?? '#011627'
+      this.context.strokeStyle = this.board.options?.cellSideColor ?? '#1e2d3d'
+      this.context.fillRect(x, y, this.cellSize, this.cellSize)
       this.context.strokeRect(x, y, this.cellSize, this.cellSize)
     })
   }
@@ -164,6 +166,7 @@ export default class Tetrimine implements ITetrimine {
   newTetrimine(): void {
     this.name = this.randomTetrimine
     this.coords = TETRIMINES[this.name].coords.map((coords) => ({ ...coords }))
+    this.color = TETRIMINES[this.name].color
     this.rotedCoords = this.coords.map((coords) => ({ ...coords }))
     this.alignTetrimine()
     this.setDownInterval(this.timeout)

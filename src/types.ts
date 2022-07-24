@@ -1,3 +1,5 @@
+import { Ref } from 'vue'
+
 export type Memory = Array<Array<TetrimineName | ''>>
 
 export enum Direction {
@@ -33,16 +35,19 @@ export interface CanvasOptions {
 }
 export interface BoardOptions {
   margin?: number
+  boardColor?: string
+  cellSideColor?: string
 }
 export interface GameOptions {
-  canvasOptions: CanvasOptions
-  boardOptions: BoardOptions
+  canvasOptions?: CanvasOptions
+  boardOptions?: BoardOptions
 }
-export interface TetrimineCoords {
+export interface TetrimineBody {
   coords: Coords[]
+  color: string
 }
 export type Tetrimines = {
-  [key in TetrimineName]: TetrimineCoords
+  [key in TetrimineName]: TetrimineBody
 }
 export interface IUtils {
   createCanvas(selector: string, options?: CanvasOptions): void
@@ -55,10 +60,9 @@ export interface IGame {
   readonly board: IBoard
   readonly tetrimine: ITetrimine
 
-  selector: string
+  el: HTMLDivElement
+  score: Ref<number>
   options?: GameOptions
-
-  get score(): number
 
   start(): void
   newGame(): void
@@ -97,6 +101,7 @@ export interface ITetrimine {
   readonly context: CanvasRenderingContext2D
 
   board: IBoard
+  color: string
   coords: Coords[]
   intervalId: number
   name: TetrimineName

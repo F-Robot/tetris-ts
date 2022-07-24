@@ -1,14 +1,17 @@
-import {
-  IBoard,
-  BoardOptions,
-  Position,
+import { TETRIMINES } from './constants'
+import type {
   Size,
   Memory,
   Coords,
+  IBoard,
+  Position,
   ITetrimine,
+  BoardOptions,
+  TetrimineName,
+  IGame,
 } from './types'
 
-export default class Board implements IBoard {
+export class Board implements IBoard {
   readonly rows = 20
   readonly columns = 10
   readonly cellSize = 25
@@ -22,12 +25,19 @@ export default class Board implements IBoard {
 
   constructor(
     public context: CanvasRenderingContext2D,
+    public game: IGame,
     public options?: BoardOptions
   ) {
     if (options && options.margin) {
       this.position = { x: options.margin, y: options.margin }
     }
     this.initMemory()
+  }
+  getMinoColor(coords: Coords) {
+    const minoName: TetrimineName | '' = this.memory[coords.y][coords.x]
+    return minoName
+      ? TETRIMINES[minoName].color
+      : this.options?.boardColor ?? '#011627'
   }
   initMemory(): void {
     this.memory = [...Array(20).keys()].map(() => [...Array(10).fill('')])
@@ -43,13 +53,14 @@ export default class Board implements IBoard {
   }
   drawCell(coords: Coords): void {
     const { x, y } = this.getPosition(coords)
-    this.context.fillStyle = '#f4f4f4'
+    this.context.fillStyle = this.options?.boardColor ?? '#011627'
+    this.context.strokeStyle = this.options?.cellSideColor ?? '#1e2d3d'
     this.context.fillRect(x, y, this.cellSize, this.cellSize)
     this.context.strokeRect(x, y, this.cellSize, this.cellSize)
   }
   drawMino(coords: Coords): void {
-    this.context.fillStyle = '#000000'
     const { x, y } = this.getPosition(coords)
+    this.context.fillStyle = this.getMinoColor(coords)
     this.context.fillRect(x, y, this.cellSize, this.cellSize)
   }
   saveTetrimine(tetrimine: ITetrimine): void {
@@ -77,15 +88,20 @@ export default class Board implements IBoard {
     this.initMemory()
     this.draw()
   }
+  updateMinos(rows: number[]) {
+    // r = Reverse index
+    this.memory.map((_row, y, memory, r = memory.length - 1 - y) => {
+      if (r < Math.min(...rows)) {
+        this.memory[r + rows.length] = [...this.memory[r]]
+      }
+    })
+  }
   clearFullRows(): void {
     const rows = this.getFullRows()
-    rows.map((row) => {
-      this.memory[row].fill('')
-      this.score += 100
-    })
-    for (let row = 19; row >= 0; row--) {
-      if (row < Math.max(...rows)) this.memory[row + 1] = [...this.memory[row]]
-    }
+    rows.map((row) => this.memory[row].fill(''))
+    this.updateMinos(rows)
+    this.score += rows.length * 100
+    this.game.score.value = this.score
     this.draw()
   }
 }

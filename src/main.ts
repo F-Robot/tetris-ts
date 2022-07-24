@@ -1,13 +1,11 @@
-import Game from './Game'
+import './style.css'
+import { Game } from './Game'
 import type { GameOptions } from './types'
-import { MARGIN } from './constants'
 
 const gameOptions: GameOptions = {
   boardOptions: {
-    margin: MARGIN,
-  },
-  canvasOptions: {
-    backgroundColor: '#f4f4f4',
+    boardColor: '#011627',
+    cellSideColor: '#1e2d3d',
   },
 }
 new Game('#app', gameOptions).start()

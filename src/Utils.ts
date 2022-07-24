@@ -2,15 +2,12 @@ import { cover } from 'intrinsic-scale'
 import type { CanvasOptions, IUtils } from './types'
 
 class Utils implements IUtils {
-  createCanvas(selector: string, options?: CanvasOptions) {
-    if (typeof selector !== 'string') throw 'Invalid selector'
-    const parent = document.querySelector<HTMLElement>(selector)
-    if (!parent) throw 'Element not found'
+  createCanvas(el: HTMLDivElement, options?: CanvasOptions) {
     const canvas = document.createElement('canvas')
     if (options && options.backgroundColor) {
       canvas.style.background = options.backgroundColor
     }
-    parent.appendChild(canvas)
+    el.appendChild(canvas)
     return canvas
   }
   getCanvasContext(canvas: HTMLCanvasElement) {

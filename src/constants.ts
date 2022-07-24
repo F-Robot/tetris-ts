@@ -25,6 +25,7 @@ export const TETRIMINES: Tetrimines = {
       { x: 1, y: 0 },
       { x: -1, y: -1 },
     ],
+    color: '#fea55f',
   },
   S: {
     coords: [
@@ -33,6 +34,7 @@ export const TETRIMINES: Tetrimines = {
       { x: 0, y: -1 },
       { x: -1, y: 0 },
     ],
+    color: '#43d9ad',
   },
   J: {
     coords: [
@@ -41,6 +43,7 @@ export const TETRIMINES: Tetrimines = {
       { x: -1, y: -1 },
       { x: 1, y: 0 },
     ],
+    color: '#e99287',
   },
   L: {
     coords: [
@@ -49,6 +52,7 @@ export const TETRIMINES: Tetrimines = {
       { x: 1, y: -1 },
       { x: 1, y: 0 },
     ],
+    color: '#c98bdf',
   },
   T: {
     coords: [
@@ -57,6 +61,7 @@ export const TETRIMINES: Tetrimines = {
       { x: 1, y: 0 },
       { x: 0, y: -1 },
     ],
+    color: '#4d5bce',
   },
   O: {
     coords: [
@@ -65,6 +70,7 @@ export const TETRIMINES: Tetrimines = {
       { x: 1, y: -1 },
       { x: 1, y: 0 },
     ],
+    color: '#ffffff',
   },
   I: {
     coords: [
@@ -73,5 +79,6 @@ export const TETRIMINES: Tetrimines = {
       { x: 1, y: 0 },
       { x: 2, y: 0 },
     ],
+    color: '#607b96',
   },
 }
